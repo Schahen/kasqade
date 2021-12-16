@@ -1,6 +1,6 @@
 package org.shabunc.kassqade.core
 
-interface SelectorContext {
+interface Selector {
     val selector: String
     var color: String?
 
@@ -13,15 +13,15 @@ interface SelectorContext {
     }
 }
 
-private class SelectorContextImplementation(override val selector: String) : SelectorContext {
+private class SelectorImplementation(override val selector: String) : Selector {
     override var color: String? = null
 }
 
-interface StyleContext {
-    val selectors: MutableList<SelectorContext>
+interface Style {
+    val selectors: MutableList<Selector>
 
-    operator fun String.invoke(context: SelectorContext.() -> Unit) {
-        val selector = SelectorContextImplementation(this)
+    operator fun String.invoke(context: Selector.() -> Unit) {
+        val selector = SelectorImplementation(this)
         selectors.add(selector)
         context.invoke(selector)
     }
@@ -31,14 +31,14 @@ interface StyleContext {
     }
 }
 
-private class StyleContextImplementation : StyleContext {
-    override val selectors: MutableList<SelectorContext> = mutableListOf()
+private class StyleImplementation : Style {
+    override val selectors: MutableList<Selector> = mutableListOf()
 }
 
-fun style(context: StyleContext.() -> Unit): StyleContext {
-    val styleContextImplementation = StyleContextImplementation()
-    context.invoke(styleContextImplementation)
-    return styleContextImplementation
+fun style(context: Style.() -> Unit): Style {
+    val styleImplementation = StyleImplementation()
+    context.invoke(styleImplementation)
+    return styleImplementation
 }
 
 fun main() {
