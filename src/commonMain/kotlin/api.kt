@@ -1,10 +1,14 @@
 package org.shabunc.kassqade.core
 
+import kotlin.reflect.KProperty
+
 data class StringProperty(val name: String, val value: String)
 
 interface Selector {
     val selector: String
     var color: String?
+    var display: String?
+    var clear: String?
 
     val stringProperties: MutableList<StringProperty>
 
@@ -21,16 +25,25 @@ interface Selector {
     }
 }
 
+private class StringPropertyDelegate(private var value: String?) {
+    operator fun getValue(owner: SelectorImplementation, property: KProperty<*>): String? {
+        return value
+    }
+
+    operator fun setValue(owner: SelectorImplementation, property: KProperty<*>, value: String?) {
+        if (value != null) {
+            owner.stringProperties.add(StringProperty(property.name, value))
+        }
+        this.value = value
+    }
+}
+
 private class SelectorImplementation(override val selector: String) : Selector {
     override val stringProperties: MutableList<StringProperty> = mutableListOf()
-    override var color: String? = null
-        get() = field
-        set(value) {
-            field = value
-            if (value != null) {
-                stringProperties.add(StringProperty("color", value))
-            }
-        }
+
+    override var color: String? by StringPropertyDelegate(null)
+    override var display: String? by StringPropertyDelegate(null)
+    override var clear: String? by StringPropertyDelegate(null)
 }
 
 interface Style {
