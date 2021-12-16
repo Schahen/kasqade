@@ -19,7 +19,7 @@ class StyleTests {
         assertEquals("red", style.selectors.first().color)
 
         assertContentEquals(
-            listOf("background-color: green;color: red;font-weight: bold;"),
+            listOf(".some {background-color: green;color: red;font-weight: bold;}"),
             style.serialize()
         )
     }
@@ -27,7 +27,7 @@ class StyleTests {
     @Test
     fun settingMultipleTimes() {
         val style = style {
-            ".class" {
+            ".some" {
                 color = "red"
                 color = "yellow"
                 color = "green"
@@ -38,7 +38,7 @@ class StyleTests {
         assertEquals("maroon", style.selectors.first().color)
 
         assertContentEquals(
-            listOf("color: red;color: yellow;color: green;color: maroon;"),
+            listOf(".some {color: red;color: yellow;color: green;color: maroon;}"),
             style.serialize()
         )
     }
@@ -54,7 +54,7 @@ class StyleTests {
         assertEquals("block", style.selectors.first().display)
 
         assertContentEquals(
-            listOf("display: block;"),
+            listOf(".some {display: block;}"),
             style.serialize()
         )
     }
@@ -70,7 +70,23 @@ class StyleTests {
         assertEquals("right", style.selectors.first().clear)
 
         assertContentEquals(
-            listOf("clear: right;"),
+            listOf(".some {clear: right;}"),
+            style.serialize()
+        )
+    }
+
+    @Test
+    fun simpleNestedTest() {
+        val style = style {
+            ".some" {
+                ".thing" {
+                    color = "yellow"
+                }
+            }
+        }
+
+        assertContentEquals(
+            listOf(".some {}", ".some .thing {color: yellow;}"),
             style.serialize()
         )
     }

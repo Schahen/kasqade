@@ -11,16 +11,24 @@ interface Selector {
     var clear: String?
 
     val stringProperties: MutableList<StringProperty>
+    val selectors: MutableList<Selector>
 
     operator fun String.invoke(value: String) {
         stringProperties.add(StringProperty(this, value))
     }
 
+    operator fun String.invoke(context: Selector.() -> Unit) {
+        val selector = SelectorImplementation("$selector $this")
+        selectors.add(selector)
+        context.invoke(selector)
+    }
+
     fun serialize(): String {
-        var res = ""
+        var res = "$selector {"
         stringProperties.forEach { property ->
             res += "${property.name}: ${property.value};"
         }
+        res += "}"
         return res
     }
 }
@@ -40,10 +48,13 @@ private class StringPropertyDelegate(private var value: String?) {
 
 private class SelectorImplementation(override val selector: String) : Selector {
     override val stringProperties: MutableList<StringProperty> = mutableListOf()
+    override val selectors: MutableList<Selector> = mutableListOf()
 
     override var color: String? by StringPropertyDelegate(null)
     override var display: String? by StringPropertyDelegate(null)
     override var clear: String? by StringPropertyDelegate(null)
+
+
 }
 
 interface Style {
@@ -56,7 +67,9 @@ interface Style {
     }
 
     fun serialize(): List<String> {
-        return selectors.map { it.serialize() }
+        return selectors.flatMap {
+            listOf(it.serialize()) + it.selectors.map { selector -> selector.serialize() }
+        }
     }
 }
 
