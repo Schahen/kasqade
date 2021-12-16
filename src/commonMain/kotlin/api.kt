@@ -14,9 +14,6 @@ interface Selector {
 
     fun serialize(): String {
         var res = ""
-        if (color != null) {
-            res += "color: $color;"
-        }
         stringProperties.forEach { property ->
             res += "${property.name}: ${property.value};"
         }
@@ -27,6 +24,13 @@ interface Selector {
 private class SelectorImplementation(override val selector: String) : Selector {
     override val stringProperties: MutableList<StringProperty> = mutableListOf()
     override var color: String? = null
+        get() = field
+        set(value) {
+            field = value
+            if (value != null) {
+                stringProperties.add(StringProperty("color", value))
+            }
+        }
 }
 
 interface Style {
