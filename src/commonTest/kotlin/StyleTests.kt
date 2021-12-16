@@ -10,11 +10,12 @@ class StyleTests {
         val style = style {
             ".some" {
                 color = "red"
+                "background-color"("green")
             }
         }
 
         assertContentEquals(
-            listOf("color: red;"),
+            listOf("color: red;background-color: green;"),
             style.serialize()
         )
     }
